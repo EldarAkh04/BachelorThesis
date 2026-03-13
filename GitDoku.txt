@@ -1,0 +1,55 @@
+Um einen Branch mit main zu mergen, muss mann zuerst in dein main branch gehen
+1. Schritt:
+-git checkout main
+
+Danach gibt man den Befehl
+2. Schritt:
+-git merge BranchNamen
+
+So sollte alles von diesem Branch übernommen sein
+
+Wie man einen Mergekolflickt löst:
+--> Sowas sollte erscheinen, was 
+
+
+git merge main
+Auto-merging Assets/Scenes/SampleScene.unity
+CONFLICT (content): Merge conflict in Assets/Scenes/SampleScene.unity
+Auto-merging Assets/Prefabs.meta
+CONFLICT (add/add): Merge conflict in Assets/Prefabs.meta
+Automatic merge failed; fix conflicts and then commit the result.
+
+
+1. Schritt:
+Das sind die Konflikte, die bei dem Merge entstanden sind
+
+-git status 
+-->zeigt dir, bei welcher Szene, oder bei welcher Datei es Konflikte gibt
+
+2. Schritt:
+Nun muss man entweder im Editor es bearbeiten oder im Terminal sagen, welche Szene von welchem Branch übernommen werden soll
+
+Mit den Befehlen ours oder theirs
+
+Beispiel:
+-git checkout --ours -- Assets/Scenes/SampleScene.unity 
+-git checkout --theirs -- Assets/Prefabs.meta
+
+
+3. Schritt:
+Die Dateien hinzufügen beim commit:
+-git add Assets/Scenes/SampleScene.unity
+
+4. Schritt: 
+-git commit
+
+5. Schritt:
+-git push origin main
+
+
+
+
+ 
+
+
+ 

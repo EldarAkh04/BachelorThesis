@@ -6,7 +6,8 @@ import time
 token = open("token.txt", "r")
 os.environ["REPLICATE_API_TOKEN"] = token.read()
 
-""" prompt = open("prompt.txt", "r") """
+""" promt = open("prompt.txt", "r")
+current_prompt = promt.read() """
 prompt_folder = os.path.expanduser("~/Desktop/8. Semester/BachelorThesis/replicate/prompt")
 files_in_prompt = os.listdir(prompt_folder)
 for prompts in files_in_prompt:

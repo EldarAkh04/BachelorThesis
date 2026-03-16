@@ -1,14 +1,16 @@
 from PIL import Image
 import requests
 from transformers import CLIPProcessor, CLIPModel
+import os
 
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-image_path = "http://images.cocodataset.org/val2017/000000039769.jpg"
-image = Image.open(requests.get(image_path, stream=True).raw)
+image_path = "~/Desktop/8. Semester/BachelorThesis/replicate/images/squirrel_cow/hybrid_1.png"
+#image = Image.open(requests.get(image_path, stream=True).raw)
+image = os.path.expanduser(image_path)
 
-labels = ["a photo of a cat", "a photo of a dog"]
+labels = ["a cat","a dog"]
 
 inputs = processor(text = labels, images=image, return_tensors="pt", padding=True)
 

@@ -4,7 +4,8 @@ import cv2
 import numpy
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
-imagePath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Trump.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Image1.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Image2.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -23,12 +24,55 @@ def annotateLandmarks(im, landmarks):
         cv2.circle(im, pos, 2, color=(0, 255, 255), thickness=-1)
     return im
 
+def transformationFromPoints(points1, points2):
+    points1 = points1.astype(numpy.float64)
+    points2 = points2.astype(numpy.float64)
 
-image = cv2.imread(imagePath)
-landmarks = getLandMarks(image)
-imageWithLandMarks = annotateLandmarks(image, landmarks)
+    c1 = numpy.mean(points1, axis=0)
+    c2 = numpy.mean(points2, axis=0)
+    points1 -= c1
+    points2 -= c2
 
-cv2.imshow('Result', imageWithLandMarks)
-cv2.imwrite('Trump.png', imageWithLandMarks)
+    s1 = numpy.std(points1)
+    s2 = numpy.std(points2)
+    points1 /= s1
+    points2 /= s2
+
+    U, S, Vt = numpy.linalg.svd(points1.T * points2)
+    R = (U * Vt).T
+
+    return numpy.vstack([numpy.hstack(((s2 / s1) * R,
+                                       c2.T - (s2 / s1) * R * c1.T)),
+                         numpy.matrix([0., 0., 1.])])
+
+def warpIm(im, M, dshape):
+    outputIm = numpy.zeros(dshape, dtype=im.dtype)
+    cv2.warpAffine(im,
+                   M[:2],
+                   (dshape[1], dshape[0]),
+                   dst=outputIm,
+                   borderMode=cv2.BORDER_TRANSPARENT,
+                   flags=cv2.WARP_INVERSE_MAP)
+    return outputIm
+
+imageA = cv2.imread(imagePathA)
+imageB = cv2.imread(imagePathB)
+
+landmarksA = getLandMarks(imageA)
+landmarksB = getLandMarks(imageB)
+
+M = transformationFromPoints(landmarksA, landmarksB)
+imageB_aligned = warpIm(imageB, M, imageA.shape)
+alignedLandmarksB = getLandMarks(imageB_aligned)
+
+imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
+imageWithLandMarksB = annotateLandmarks(imageB_aligned, alignedLandmarksB)
+
+cv2.imshow('ImageA', imageWithLandMarksA)
+cv2.imshow('ImageB', imageWithLandMarksB)
+
+cv2.imwrite('ImageA.png', imageWithLandMarksA)
+cv2.imwrite('ImageB.png', imageWithLandMarksB)
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()

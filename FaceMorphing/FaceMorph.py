@@ -55,6 +55,26 @@ def warpIm(im, M, dshape):
                    flags=cv2.WARP_INVERSE_MAP)
     return outputIm
 
+def landmarksPos(landmarks):
+    for i, point in enumerate(landmarks):
+        x = int(landmarks[i, 0])
+        y = int(landmarks[i, 1])
+        print(f"Punkt {i} x={x}, y={y}")
+
+def averageLandmark(landmarks1, landmarks2, alpha=0.5):
+    landmarks1 = numpy.array(landmarks1).astype(float)
+    landmarks2 = numpy.array(landmarks2).astype(float)
+    
+    landmarksMorphed = (1 - alpha) * landmarks1 + alpha * landmarks2
+    
+    for i in range(len(landmarksMorphed)):
+        x = int(landmarksMorphed[i, 0])
+        y = int(landmarksMorphed[i, 1])
+        print(f"Punkt {i}: x={x}, y={y}")
+        
+    return landmarksMorphed
+
+
 imageA = cv2.imread(imagePathA)
 imageB = cv2.imread(imagePathB)
 
@@ -68,11 +88,20 @@ alignedLandmarksB = getLandMarks(imageB_aligned)
 imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
 imageWithLandMarksB = annotateLandmarks(imageB_aligned, alignedLandmarksB)
 
-cv2.imshow('ImageA', imageWithLandMarksA)
+""" cv2.imshow('ImageA', imageWithLandMarksA)
 cv2.imshow('ImageB', imageWithLandMarksB)
 
 cv2.imwrite('ImageA.png', imageWithLandMarksA)
 cv2.imwrite('ImageB.png', imageWithLandMarksB)
 
 cv2.waitKey(0)
-cv2.destroyAllWindows()
+cv2.destroyAllWindows() """
+
+koordinationA = landmarksPos(landmarksA)
+print("-"*30)
+koordinationB = landmarksPos(landmarksB)
+print("-"*30)
+averageLandmark(landmarksA, landmarksB)
+
+
+

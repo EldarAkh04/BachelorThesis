@@ -2,6 +2,7 @@ import dlib
 import os
 import cv2
 import numpy
+from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
 imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Image1.png"
@@ -74,6 +75,55 @@ def averageLandmark(landmarks1, landmarks2, alpha=0.5):
         
     return landmarksMorphed
 
+def delaunayTriangle(landmarksMorphed):
+    tri = Delaunay(landmarksMorphed)
+    print(tri.simplices)
+    return tri
+
+def drawDelaunay(img, landmarks, simplices):
+    img_copy = img.copy()
+    
+    for s in simplices:
+        pt1 = tuple(landmarks[s[0]].astype(int))
+        pt2 = tuple(landmarks[s[1]].astype(int))
+        pt3 = tuple(landmarks[s[2]].astype(int))
+
+        cv2.line(img_copy, pt1, pt2, (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.line(img_copy, pt2, pt3, (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.line(img_copy, pt3, pt1, (0, 255, 0), 1, cv2.LINE_AA)
+        
+    return img_copy
+
+def morphTriangle(img1, img2, img, tri1, tri2, tri, alpha):
+    r1 = cv2.boundingRect(numpy.float32([tri1]))
+    r2 = cv2.boundingRect(numpy.float32([tri2]))
+    r  = cv2.boundingRect(numpy.float32([tri]))
+
+    t1Rect = []
+    t2Rect = []
+    tRect  = []
+
+    for i in range(3):
+        tRect.append(((tri[i][0] - r[0]), (tri[i][1] - r[1])))
+        t1Rect.append(((tri1[i][0] - r1[0]), (tri1[i][1] - r1[1])))
+        t2Rect.append(((tri2[i][0] - r2[0]), (tri2[i][1] - r2[1])))
+
+    mask = numpy.zeros((r[3], r[2], 3), dtype=numpy.float32)
+    cv2.fillConvexPoly(mask, numpy.int32(tRect), (1.0, 1.0, 1.0), 16, 0)
+    img1Rect = img1[r1[1]:r1[1] + r1[3], r1[0]:r1[0] + r1[2]]
+    img2Rect = img2[r2[1]:r2[1] + r2[3], r2[0]:r2[0] + r2[2]]
+
+    size = (r[2], r[3])
+    warpMat1 = cv2.getAffineTransform(numpy.float32(t1Rect), numpy.float32(tRect))
+    warpMat2 = cv2.getAffineTransform(numpy.float32(t2Rect), numpy.float32(tRect))
+
+    imgRect1 = cv2.warpAffine(img1Rect, warpMat1, (size[0], size[1]), None, 
+                              flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+    imgRect2 = cv2.warpAffine(img2Rect, warpMat2, (size[0], size[1]), None, 
+                              flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+    imgRect = (1.0 - alpha) * imgRect1 + alpha * imgRect2
+    img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * (1 - mask) + imgRect * mask
+
 
 imageA = cv2.imread(imagePathA)
 imageB = cv2.imread(imagePathB)
@@ -101,7 +151,21 @@ koordinationA = landmarksPos(landmarksA)
 print("-"*30)
 koordinationB = landmarksPos(landmarksB)
 print("-"*30)
-averageLandmark(landmarksA, landmarksB)
+landmarksMorphed = averageLandmark(landmarksA, landmarksB)
+tri = delaunayTriangle(landmarksMorphed)
+blank_image = numpy.zeros(imageA.shape, dtype=numpy.uint8)
+debugImage = drawDelaunay(blank_image, landmarksMorphed, tri.simplices)
+cv2.imwrite("Delaunay_Check_Pure.png", debugImage)
+imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
+for s in tri.simplices:
+    t1 = numpy.array([landmarksA[s[0]], landmarksA[s[1]], landmarksA[s[2]]], dtype=numpy.float32).reshape(3, 2)
+    t2 = numpy.array([alignedLandmarksB[s[0]], alignedLandmarksB[s[1]], alignedLandmarksB[s[2]]], dtype=numpy.float32).reshape(3, 2)
+    t  = numpy.array([landmarksMorphed[s[0]], landmarksMorphed[s[1]], landmarksMorphed[s[2]]], dtype=numpy.float32).reshape(3, 2)
+
+    morphTriangle(imageA, imageB_aligned, imgMorph, t1, t2, t, 0.5)
+cv2.imwrite("FinalMorph.png", imgMorph)
+
+
 
 
 

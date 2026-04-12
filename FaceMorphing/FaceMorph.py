@@ -124,7 +124,6 @@ def morphTriangle(img1, img2, img, tri1, tri2, tri, alpha):
     imgRect = (1.0 - alpha) * imgRect1 + alpha * imgRect2
     img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * (1 - mask) + imgRect * mask
 
-
 imageA = cv2.imread(imagePathA)
 imageB = cv2.imread(imagePathB)
 
@@ -132,11 +131,11 @@ landmarksA = getLandMarks(imageA)
 landmarksB = getLandMarks(imageB)
 
 M = transformationFromPoints(landmarksA, landmarksB)
-imageB_aligned = warpIm(imageB, M, imageA.shape)
-alignedLandmarksB = getLandMarks(imageB_aligned)
+imageBaligned = warpIm(imageB, M, imageA.shape)
+alignedLandmarksB = getLandMarks(imageBaligned)
 
 imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
-imageWithLandMarksB = annotateLandmarks(imageB_aligned, alignedLandmarksB)
+imageWithLandMarksB = annotateLandmarks(imageBaligned, alignedLandmarksB)
 
 """ cv2.imshow('ImageA', imageWithLandMarksA)
 cv2.imshow('ImageB', imageWithLandMarksB)
@@ -151,21 +150,59 @@ koordinationA = landmarksPos(landmarksA)
 print("-"*30)
 koordinationB = landmarksPos(landmarksB)
 print("-"*30)
+
 landmarksMorphed = averageLandmark(landmarksA, landmarksB)
 tri = delaunayTriangle(landmarksMorphed)
 blank_image = numpy.zeros(imageA.shape, dtype=numpy.uint8)
 debugImage = drawDelaunay(blank_image, landmarksMorphed, tri.simplices)
-cv2.imwrite("Delaunay_Check_Pure.png", debugImage)
+cv2.imwrite("DelaunayCheckPure.png", debugImage)
 imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
 for s in tri.simplices:
     t1 = numpy.array([landmarksA[s[0]], landmarksA[s[1]], landmarksA[s[2]]], dtype=numpy.float32).reshape(3, 2)
     t2 = numpy.array([alignedLandmarksB[s[0]], alignedLandmarksB[s[1]], alignedLandmarksB[s[2]]], dtype=numpy.float32).reshape(3, 2)
     t  = numpy.array([landmarksMorphed[s[0]], landmarksMorphed[s[1]], landmarksMorphed[s[2]]], dtype=numpy.float32).reshape(3, 2)
 
-    morphTriangle(imageA, imageB_aligned, imgMorph, t1, t2, t, 0.5)
+    morphTriangle(imageA, imageBaligned, imgMorph, t1, t2, t, 0.5)
 cv2.imwrite("FinalMorph.png", imgMorph)
 
+#HIntergrund übernehmen:
+""" 
+morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/FinalMorph.png"
+if(os.path.exists(morphedPath)):
+    print("ist vorhanden")
 
+imageM = cv2.imread(morphedPath)
+landmarksM = getLandMarks(imageM)
 
+M_M = transformationFromPoints(landmarksA, landmarksM)
+imageMaligned = warpIm(imageM, M_M, imageA.shape)
+alignedLandmarksM = getLandMarks(imageMaligned)
 
+imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
+imageWithLandMarksM = annotateLandmarks(imageMaligned, alignedLandmarksM)
 
+cv2.imshow('ImageA', imageWithLandMarksA)
+cv2.imshow('Morphed Image mit Landmarks', imageWithLandMarksM)
+
+cv2.imwrite('ImageA.png', imageWithLandMarksA)
+cv2.imwrite('ImageM.png', imageWithLandMarksM)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+src = imageMaligned 
+dst = imageA        
+
+srcMask = numpy.zeros(dst.shape, dst.dtype)
+outerPoints = list(range(0, 27)) 
+
+hull = cv2.convexHull(numpy.array(landmarksA[outerPoints], dtype=numpy.int32))
+cv2.fillPoly(srcMask, [hull], (255, 255, 255))
+
+r = cv2.boundingRect(hull)
+center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
+
+output = cv2.seamlessClone(src, dst, srcMask, center, cv2.NORMAL_CLONE)
+
+cv2.imwrite("morphWithBackground.png", output)
+ """

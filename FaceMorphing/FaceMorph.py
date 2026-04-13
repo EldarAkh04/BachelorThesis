@@ -10,6 +10,8 @@ imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorp
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
+#https://github.com/matthewearl/faceswap/blob/master/faceswap.py 
+#Wurde eigentlich für faceswap benutzt: http://matthewearl.github.io/2015/07/28/switching-eds-with-python/
 def getLandMarks(im):
     rects = detector(im, 1)
     return numpy.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
@@ -166,7 +168,6 @@ for s in tri.simplices:
 cv2.imwrite("FinalMorph.png", imgMorph)
 
 #HIntergrund übernehmen:
-""" 
 morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/FinalMorph.png"
 if(os.path.exists(morphedPath)):
     print("ist vorhanden")
@@ -181,15 +182,15 @@ alignedLandmarksM = getLandMarks(imageMaligned)
 imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
 imageWithLandMarksM = annotateLandmarks(imageMaligned, alignedLandmarksM)
 
-cv2.imshow('ImageA', imageWithLandMarksA)
+""" cv2.imshow('ImageA', imageWithLandMarksA)
 cv2.imshow('Morphed Image mit Landmarks', imageWithLandMarksM)
 
 cv2.imwrite('ImageA.png', imageWithLandMarksA)
 cv2.imwrite('ImageM.png', imageWithLandMarksM)
 
 cv2.waitKey(0)
-cv2.destroyAllWindows()
-
+cv2.destroyAllWindows() """
+#Hintergrund: https://learnopencv.com/seamless-cloning-using-opencv-python-cpp/
 src = imageMaligned 
 dst = imageA        
 
@@ -204,5 +205,4 @@ center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
 output = cv2.seamlessClone(src, dst, srcMask, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("morphWithBackground.png", output)
- """
+cv2.imwrite("morphWithBackgroundOriginal.png", output)

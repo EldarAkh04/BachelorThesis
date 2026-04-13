@@ -5,8 +5,8 @@ import numpy
 from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Image1.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Image2.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/IM3.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/IM4.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -139,11 +139,11 @@ alignedLandmarksB = getLandMarks(imageBaligned)
 imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
 imageWithLandMarksB = annotateLandmarks(imageBaligned, alignedLandmarksB)
 
-""" cv2.imshow('ImageA', imageWithLandMarksA)
-cv2.imshow('ImageB', imageWithLandMarksB)
-
 cv2.imwrite('ImageA.png', imageWithLandMarksA)
 cv2.imwrite('ImageB.png', imageWithLandMarksB)
+
+""" cv2.imshow('ImageA', imageWithLandMarksA)
+cv2.imshow('ImageB', imageWithLandMarksB)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows() """
@@ -191,18 +191,25 @@ cv2.imwrite('ImageM.png', imageWithLandMarksM)
 cv2.waitKey(0)
 cv2.destroyAllWindows() """
 #Hintergrund: https://learnopencv.com/seamless-cloning-using-opencv-python-cpp/
-src = imageMaligned 
-dst = imageA        
+src = imageMaligned
+dst = imageA
 
-srcMask = numpy.zeros(dst.shape, dst.dtype)
-outerPoints = list(range(0, 27)) 
-
+mask = numpy.zeros(dst.shape[:2], dtype=numpy.uint8)
+outerPoints = list(range(0, 27))
 hull = cv2.convexHull(numpy.array(landmarksA[outerPoints], dtype=numpy.int32))
-cv2.fillPoly(srcMask, [hull], (255, 255, 255))
+cv2.fillPoly(mask, [hull], 255)
+
+kernel = numpy.ones((15, 15), numpy.uint8)
+mask_eroded = cv2.erode(mask, kernel, iterations=1)
+
+mask_soft = cv2.GaussianBlur(mask_eroded, (71, 71), 0)
+
+alpha = cv2.cvtColor(mask_soft, cv2.COLOR_GRAY2BGR).astype(float) / 255.0
+srcBlended = (src.astype(float) * alpha + dst.astype(float) * (1.0 - alpha)).astype(numpy.uint8)
 
 r = cv2.boundingRect(hull)
 center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
-output = cv2.seamlessClone(src, dst, srcMask, center, cv2.NORMAL_CLONE)
+output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("morphWithBackgroundOriginal.png", output)
+cv2.imwrite("morphWithBackground6.png", output)

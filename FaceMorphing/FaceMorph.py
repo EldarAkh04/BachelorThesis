@@ -5,8 +5,8 @@ import numpy
 from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/IM3.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/IM4.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/outputPNG/IM45.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/outputPNG/IM49.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -169,6 +169,7 @@ cv2.imwrite("FinalMorph.png", imgMorph)
 
 #HIntergrund übernehmen:
 morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/FinalMorph.png"
+#hier noch mit einem anderen Hintergrund versuchen für IM7 und IM17 als Hintergrund IM51
 if(os.path.exists(morphedPath)):
     print("ist vorhanden")
 
@@ -212,4 +213,4 @@ center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
 output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("morphWithBackground6.png", output)
+cv2.imwrite("morphWithBackground8.png", output)

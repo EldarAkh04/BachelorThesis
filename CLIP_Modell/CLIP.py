@@ -6,7 +6,7 @@ import os
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-folder_path = "~/Desktop/8. Semester/BachelorThesis/replicate/images/squirrel_cow"
+folder_path = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/TestIMG"
 #image = Image.open(requests.get(folder_path, stream=True).raw)
 image_path = os.path.expanduser(folder_path)
 image_list = os.listdir(image_path)
@@ -16,7 +16,8 @@ for filename in image_list:
     full_image_path = os.path.join(image_path, filename)
 
     current_image = Image.open(full_image_path)
-    labels = ["a cat","a dog"]
+    #labels = ["not ai generated", "ai generated"]
+    labels = ["is facemorphing", "is not facemorphing"]
 
     inputs = processor(text = labels, images=current_image, return_tensors="pt", padding=True)
     outputs = model(**inputs)

@@ -5,9 +5,8 @@ import numpy
 from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
-
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM101.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM578.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/white/Woman/IM880.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM101.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -19,18 +18,8 @@ def getLandMarks(im):
 
 def annotateLandmarks(im, landmarks):
     im = im.copy()
-    landmarks = numpy.array(landmarks)
-    
-    for idx in range(len(landmarks)):
-        if landmarks.ndim == 2:
-            x = int(landmarks[idx][0])
-            y = int(landmarks[idx][1])
-        else:
-            x = int(landmarks[idx, 0])
-            y = int(landmarks[idx, 1])
-        
-        pos = (x, y)
-        
+    for idx, point in enumerate(landmarks):
+        pos = (point[0, 0], point[0, 1])
         cv2.putText(im, str(idx), pos, 
                     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                     fontScale=0.3,
@@ -137,171 +126,20 @@ def morphTriangle(img1, img2, img, tri1, tri2, tri, alpha):
     imgRect = (1.0 - alpha) * imgRect1 + alpha * imgRect2
     img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * (1 - mask) + imgRect * mask
 
-def addExtraLandmarks(landmarks):
-    landmarks = numpy.array(landmarks)
-    extraPoints = []
-    
-    # 1. KIEFER (Punkte 0-16): Zwischen jedem Punkt einen hinzufügen
-    for i in range(16):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    
-    # 2. AUGENBRAUEN (17-21 rechts, 22-26 links)
-    # Rechte Augenbraue
-    for i in range(17, 21):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    
-    # Linke Augenbraue
-    for i in range(22, 26):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    
-    # 3. NASE (27-35)
-    # Nasenrücken
-    for i in range(27, 30):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    
-    # Nasenflügel
-    for i in range(31, 35):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    
-    # 4. AUGEN (36-41 rechts, 42-47 links)
-    # Rechtes Auge
-    for i in range(36, 41):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    # Schließe rechtes Auge
-    mid = (landmarks[41] + landmarks[36]) / 2
-    extraPoints.append(mid)
-    
-    # Linkes Auge
-    for i in range(42, 47):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    # Schließe linkes Auge
-    mid = (landmarks[47] + landmarks[42]) / 2
-    extraPoints.append(mid)
-    
-    # 5. MUND AUSSEN (48-59)
-    for i in range(48, 59):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    # Schließe äußeren Mund
-    mid = (landmarks[59] + landmarks[48]) / 2
-    extraPoints.append(mid)
-    
-    # 6. MUND INNEN (60-67)
-    for i in range(60, 67):
-        p1 = landmarks[i]
-        p2 = landmarks[i + 1]
-        mid = (p1 + p2) / 2
-        extraPoints.append(mid)
-    # Schließe inneren Mund
-    mid = (landmarks[67] + landmarks[60]) / 2
-    extraPoints.append(mid)
-    
-    # Stirn (oberhalb der Augenbrauen)
-    eyebrow_center_right = (landmarks[19] + landmarks[20]) / 2
-    eyebrow_center_left = (landmarks[23] + landmarks[24]) / 2
-    nose_top = landmarks[27]
-    
-    # Stirnpunkte
-    forehead_right = eyebrow_center_right + numpy.array([0, -30])
-    forehead_left = eyebrow_center_left + numpy.array([0, -30])
-    forehead_center = nose_top + numpy.array([0, -50])
-    
-    extraPoints.extend([forehead_right, forehead_left, forehead_center])
-    
-    # Wangenpunkte (zwischen Auge und Kiefer)
-    # Rechte Wange
-    cheekRight1 = (landmarks[2] + landmarks[36]) / 2
-    cheekRight2 = (landmarks[3] + landmarks[39]) / 2
-    cheekRight3 = (landmarks[4] + landmarks[31]) / 2
-    
-    # Linke Wange
-    cheekLeft1 = (landmarks[14] + landmarks[45]) / 2
-    cheekLeft2 = (landmarks[13] + landmarks[42]) / 2
-    cheekLeft3 = (landmarks[12] + landmarks[35]) / 2
-    
-    extraPoints.extend([
-        cheekRight1, cheekRight2, cheekRight3,
-        cheekLeft1, cheekLeft2, cheekLeft3
-    ])
-    
-    # Kinnpunkte (zusätzliche Punkte am Kinn)
-    chinCenter = landmarks[8]
-    chinLeft = (landmarks[6] + landmarks[8]) / 2
-    chinRight = (landmarks[10] + landmarks[8]) / 2
-    
-    extraPoints.extend([chinLeft, chinRight])
-    
-    
-    allLandmarks = numpy.vstack([landmarks, extraPoints])
-    
-    return allLandmarks
-
-def addBorderPoints(landmarks, imgShape):
-    """
-    Fügt Randpunkte am Bildrand hinzu
-    """
-    h, w = imgShape[:2]
-    landmarks = numpy.array(landmarks)
-    
-    border = [
-        [0, 0], [w-1, 0], [0, h-1], [w-1, h-1],
-        [w//2, 0], [0, h//2], [w-1, h//2], [w//2, h-1],
-        [w//4, 0], [3*w//4, 0],
-        [w//4, h-1], [3*w//4, h-1],
-        [0, h//4], [0, 3*h//4],
-        [w-1, h//4], [w-1, 3*h//4]
-    ]
-    
-    return numpy.vstack([landmarks, border])
-
 imageA = cv2.imread(imagePathA)
 imageB = cv2.imread(imagePathB)
 
 landmarksA = getLandMarks(imageA)
 landmarksB = getLandMarks(imageB)
 
-M = transformationFromPoints(landmarksA, landmarksB)
+""" M = transformationFromPoints(landmarksA, landmarksB)
 imageBaligned = warpIm(imageB, M, imageA.shape)
-alignedLandmarksB = getLandMarks(imageBaligned)
+alignedLandmarksB = getLandMarks(imageBaligned) """
+imageBaligned = imageB  # Bild B nicht ausgerichtet
+alignedLandmarksB = landmarksB  # Landmarks nicht transformiert
 
-landmarksAExtra = addExtraLandmarks(landmarksA)
-landmarksBExtra = addExtraLandmarks(alignedLandmarksB)
-
-landmarksAFull = addBorderPoints(landmarksAExtra, imageA.shape)
-landmarksBFull = addBorderPoints(landmarksBExtra, imageBaligned.shape)
-
-landmarksAFull = numpy.matrix(landmarksAFull)
-landmarksBFull = numpy.matrix(landmarksBFull)
-
-print(f"Original Landmarks: 68")
-print(f"Mit Extra Landmarks: {len(landmarksAExtra)}")
-print(f"Mit Randpunkten: {len(landmarksAFull)}")
-
-imageWithLandMarksA = annotateLandmarks(imageA, landmarksAFull)
-imageWithLandMarksB = annotateLandmarks(imageBaligned, landmarksBFull)
+imageWithLandMarksA = annotateLandmarks(imageA, landmarksA)
+imageWithLandMarksB = annotateLandmarks(imageB, landmarksB)
 
 cv2.imwrite('ImageA.png', imageWithLandMarksA)
 cv2.imwrite('ImageB.png', imageWithLandMarksB)
@@ -312,35 +150,29 @@ cv2.imshow('ImageB', imageWithLandMarksB)
 cv2.waitKey(0)
 cv2.destroyAllWindows() """
 
-koordinationA = landmarksPos(landmarksAFull)
+koordinationA = landmarksPos(landmarksA)
 print("-"*30)
-koordinationB = landmarksPos(landmarksBFull)
+koordinationB = landmarksPos(landmarksB)
 print("-"*30)
 
-# Morphed Landmarks mit ALLEN Punkten
-landmarksMorphed = averageLandmark(landmarksAFull, landmarksBFull)
-tri = delaunayTriangle(landmarksMorphed) #3.2.3
+landmarksMorphed = averageLandmark(landmarksA, landmarksB)
+tri = delaunayTriangle(landmarksMorphed)
 blank_image = numpy.zeros(imageA.shape, dtype=numpy.uint8)
 debugImage = drawDelaunay(blank_image, landmarksMorphed, tri.simplices)
 cv2.imwrite("DelaunayTrian.png", debugImage)
-print(f"Anzahl Dreiecke: {len(tri.simplices)}")
-
-# Morphing mit ALLEN Landmarks 3.2.4
 imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
 for s in tri.simplices:
-    t1 = numpy.array([landmarksAFull[s[0]], landmarksAFull[s[1]], landmarksAFull[s[2]]], dtype=numpy.float32).reshape(3, 2)
-    t2 = numpy.array([landmarksBFull[s[0]], landmarksBFull[s[1]], landmarksBFull[s[2]]], dtype=numpy.float32).reshape(3, 2)
+    t1 = numpy.array([landmarksA[s[0]], landmarksA[s[1]], landmarksA[s[2]]], dtype=numpy.float32).reshape(3, 2)
+    t2 = numpy.array([alignedLandmarksB[s[0]], alignedLandmarksB[s[1]], alignedLandmarksB[s[2]]], dtype=numpy.float32).reshape(3, 2)
     t  = numpy.array([landmarksMorphed[s[0]], landmarksMorphed[s[1]], landmarksMorphed[s[2]]], dtype=numpy.float32).reshape(3, 2)
 
-    morphTriangle(imageA, imageBaligned, imgMorph, t1, t2, t, 0.5)#Wichtigster Part-->Verbindet alles
-
-imgMorph = cv2.bilateralFilter(imgMorph, 5, 50, 50)
-
+    morphTriangle(imageA, imageBaligned, imgMorph, t1, t2, t, 0.5)
+cv2.imwrite("OhnebilateralFilter.png", imgMorph)#-->HIER
 cv2.imwrite("FinalMorph.png", imgMorph)
-print("Morph gespeichert!")
 
-#Hintergrund übernehmen:
+#HIntergrund übernehmen:
 morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/FinalMorph.png"
+#hier noch mit einem anderen Hintergrund versuchen für IM7 und IM17 als Hintergrund IM51
 if(os.path.exists(morphedPath)):
     print("ist vorhanden")
 
@@ -362,7 +194,7 @@ cv2.imwrite('ImageM.png', imageWithLandMarksM)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows() """
-#HIntergrund: https://learnopencv.com/seamless-cloning-using-opencv-python-cpp/
+#Hintergrund: https://learnopencv.com/seamless-cloning-using-opencv-python-cpp/
 src = imageMaligned
 dst = imageA
 
@@ -384,4 +216,4 @@ center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
 output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Test3.png", output)
+cv2.imwrite("Test2.png", output)

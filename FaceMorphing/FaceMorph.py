@@ -6,8 +6,8 @@ from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
 
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM101.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM578.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM181.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM190.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -79,7 +79,7 @@ def averageLandmark(landmarks1, landmarks2, alpha=0.5):
     landmarks1 = numpy.array(landmarks1).astype(float)
     landmarks2 = numpy.array(landmarks2).astype(float)
     
-    landmarksMorphed = (1 - alpha) * landmarks1 + alpha * landmarks2
+    landmarksMorphed = alpha * landmarks1 + alpha * landmarks2
     
     for i in range(len(landmarksMorphed)):
         x = int(landmarksMorphed[i, 0])
@@ -95,6 +95,7 @@ def delaunayTriangle(landmarksMorphed):
 
 def drawDelaunay(img, landmarks, simplices):
     img_copy = img.copy()
+    landmarks = numpy.array(landmarks)
     
     for s in simplices:
         pt1 = tuple(landmarks[s[0]].astype(int))
@@ -260,9 +261,6 @@ def addExtraLandmarks(landmarks):
     return allLandmarks
 
 def addBorderPoints(landmarks, imgShape):
-    """
-    Fügt Randpunkte am Bildrand hinzu
-    """
     h, w = imgShape[:2]
     landmarks = numpy.array(landmarks)
     
@@ -283,6 +281,8 @@ imageB = cv2.imread(imagePathB)
 landmarksA = getLandMarks(imageA)
 landmarksB = getLandMarks(imageB)
 
+
+#Affine Transformation
 M = transformationFromPoints(landmarksA, landmarksB)
 imageBaligned = warpIm(imageB, M, imageA.shape)
 alignedLandmarksB = getLandMarks(imageBaligned)
@@ -320,10 +320,19 @@ print("-"*30)
 # Morphed Landmarks mit ALLEN Punkten
 landmarksMorphed = averageLandmark(landmarksAFull, landmarksBFull)
 tri = delaunayTriangle(landmarksMorphed) #3.2.3
-blank_image = numpy.zeros(imageA.shape, dtype=numpy.uint8)
-debugImage = drawDelaunay(blank_image, landmarksMorphed, tri.simplices)
+blankImage = numpy.zeros(imageA.shape, dtype=numpy.uint8)
+debugImage = drawDelaunay(blankImage, landmarksMorphed, tri.simplices)
 cv2.imwrite("DelaunayTrian.png", debugImage)
 print(f"Anzahl Dreiecke: {len(tri.simplices)}")
+
+# Delaunay Triangulation:
+debugImageA = imageA.copy()
+debugImageA = drawDelaunay(debugImageA, landmarksAFull, tri.simplices)
+cv2.imwrite("DelaunayTrian_A.png", debugImageA)
+
+debugImageB = imageBaligned.copy()
+debugImageB = drawDelaunay(debugImageB, landmarksBFull, tri.simplices)
+cv2.imwrite("DelaunayTrian_B.png", debugImageB)
 
 # Morphing mit ALLEN Landmarks 3.2.4
 imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
@@ -384,4 +393,4 @@ center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
 output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Test3.png", output)
+cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/190/IM190-low.png", output)

@@ -5,8 +5,8 @@ import numpy
 from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/white/Woman/IM880.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM101.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Woman/IM454.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Woman/IM17.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 

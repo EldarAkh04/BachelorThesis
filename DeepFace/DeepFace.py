@@ -4,32 +4,27 @@ import pandas as pd
 import os
 
 
-img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/IM101.png"
-img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/101/IM101-mid.png"
+img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM190.png"
+img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM181.png"
 
-imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Test3.png"
+imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/190/IM190-low.png"
+#imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/TestE.png"
 
 folderPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic"
 
-compareImage = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Woman/IM777.png"
-pathToCompare = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Woman"
+compareImage = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/IM471.png"
+pathToCompare = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man"
 
 def passControl(img1, img2):
     result = DeepFace.verify(img1, img2, model_name = "Facenet512")
-    obj = DeepFace.analyze(img1, actions=['age','gender', 'race'])[0]
-
-    print("Geschlecht: " +  obj['dominant_gender'])
-    age = int(obj['age'])
-    print("Alter: " +  str(age))
-    print("Ethnizität: " + obj['dominant_race'])
     verified = bool(result['verified'])
     distance = round(result['distance'], 4)
     threshold = float(result['threshold'])
+    print("Ähnlichkeit: " + result['similarity_metric'])
 
     print("Verified: " + str(verified))
     print("Distanz: " + str(distance))
-    print("Treshold: " + str(threshold))
-    print("Ähnlichkeit: " + result['similarity_metric'])
+    print("Threshold: " + str(threshold))
 
 def classifyPerson(folderPath):
     data = []
@@ -76,9 +71,9 @@ def comparePersons(compareImage, pathToCompare):
         })   
     
     df = pd.DataFrame(data)
-    df.to_excel("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Woman/vergleiche777.xlsx", index=False)
+    df.to_excel("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/vergleiche471.xlsx", index=False)
     print("Fertig")
 
 #comparePersons(compareImage, pathToCompare)
-passControl(img1, img2)
+passControl(img1, imgMorph)
 #classifyPerson(folderPath)

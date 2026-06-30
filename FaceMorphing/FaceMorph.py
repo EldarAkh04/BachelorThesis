@@ -1,3 +1,57 @@
+#!/usr/bin/python
+
+# Copyright (c) 2015 Matthew Earl
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+#     The above copyright notice and this permission notice shall be included
+#     in all copies or substantial portions of the Software.
+# 
+#     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+#     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+#     NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+#     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+#     OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+#     USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# ============================================================================
+# ADAPTED BY: Eldar Akhundzada
+# MODIFICATIONS (2026):
+# - Converted to camelCase naming convention
+# - Added custom functions: addExtraLandmarks(), addBorderPoints()
+# - Added seamless cloning for background integration
+# - Adapted for Face Morphing research [12]
+# ============================================================================
+
+"""
+This is the code behind the Switching Eds blog post:
+
+    http://matthewearl.github.io/2015/07/28/switching-eds-with-python/
+
+See the above for an explanation of the code below.
+
+To run the script you'll need to install dlib (http://dlib.net) including its
+Python bindings, and OpenCV. You'll also need to obtain the trained model from
+sourceforge:
+
+    http://sourceforge.net/projects/dclib/files/dlib/v18.10/shape_predictor_68_face_landmarks.dat.bz2
+
+Unzip with `bunzip2` and change `PREDICTOR_PATH` to refer to this file. The
+script is run like so:
+
+    ./faceswap.py <head image> <face image>
+
+If successful, a file `output.jpg` will be produced with the facial features
+from `<head image>` replaced with the facial features from `<face image>`.
+
+"""
+
 import dlib
 import os
 import cv2
@@ -11,8 +65,6 @@ imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
-#https://github.com/matthewearl/faceswap/blob/master/faceswap.py 
-#Wurde eigentlich für faceswap benutzt: http://matthewearl.github.io/2015/07/28/switching-eds-with-python/
 def getLandMarks(im):
     rects = detector(im, 1)
     return numpy.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
@@ -253,7 +305,7 @@ def addExtraLandmarks(landmarks):
     chinLeft = (landmarks[6] + landmarks[8]) / 2
     chinRight = (landmarks[10] + landmarks[8]) / 2
     
-    extraPoints.extend([chinLeft, chinRight])
+    extraPoints.extend([chinLeft, chinCenter ,chinRight])
     
     
     allLandmarks = numpy.vstack([landmarks, extraPoints])
@@ -317,15 +369,16 @@ print("-"*30)
 koordinationB = landmarksPos(landmarksBFull)
 print("-"*30)
 
-# Morphed Landmarks mit ALLEN Punkten
+# Morphed Landmarks mit jedem Punkten
 landmarksMorphed = averageLandmark(landmarksAFull, landmarksBFull)
-tri = delaunayTriangle(landmarksMorphed) #3.2.3
+# Delaunay Triangulation:
+tri = delaunayTriangle(landmarksMorphed)
 blankImage = numpy.zeros(imageA.shape, dtype=numpy.uint8)
 debugImage = drawDelaunay(blankImage, landmarksMorphed, tri.simplices)
 cv2.imwrite("DelaunayTrian.png", debugImage)
 print(f"Anzahl Dreiecke: {len(tri.simplices)}")
 
-# Delaunay Triangulation:
+
 debugImageA = imageA.copy()
 debugImageA = drawDelaunay(debugImageA, landmarksAFull, tri.simplices)
 cv2.imwrite("DelaunayTrian_A.png", debugImageA)
@@ -334,14 +387,14 @@ debugImageB = imageBaligned.copy()
 debugImageB = drawDelaunay(debugImageB, landmarksBFull, tri.simplices)
 cv2.imwrite("DelaunayTrian_B.png", debugImageB)
 
-# Morphing mit ALLEN Landmarks 3.2.4
+# Morphing mit jedem Landmark
 imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
 for s in tri.simplices:
     t1 = numpy.array([landmarksAFull[s[0]], landmarksAFull[s[1]], landmarksAFull[s[2]]], dtype=numpy.float32).reshape(3, 2)
     t2 = numpy.array([landmarksBFull[s[0]], landmarksBFull[s[1]], landmarksBFull[s[2]]], dtype=numpy.float32).reshape(3, 2)
     t  = numpy.array([landmarksMorphed[s[0]], landmarksMorphed[s[1]], landmarksMorphed[s[2]]], dtype=numpy.float32).reshape(3, 2)
 
-    morphTriangle(imageA, imageBaligned, imgMorph, t1, t2, t, 0.5)#Wichtigster Part-->Verbindet alles
+    morphTriangle(imageA, imageBaligned, imgMorph, t1, t2, t, 0.5)
 
 imgMorph = cv2.bilateralFilter(imgMorph, 5, 50, 50)
 
@@ -371,7 +424,7 @@ cv2.imwrite('ImageM.png', imageWithLandMarksM)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows() """
-#HIntergrund: https://learnopencv.com/seamless-cloning-using-opencv-python-cpp/
+#Hintergrund
 src = imageMaligned
 dst = imageA
 
@@ -381,16 +434,16 @@ hull = cv2.convexHull(numpy.array(landmarksA[outerPoints], dtype=numpy.int32))
 cv2.fillPoly(mask, [hull], 255)
 
 kernel = numpy.ones((15, 15), numpy.uint8)
-mask_eroded = cv2.erode(mask, kernel, iterations=1)
+maskEroded = cv2.erode(mask, kernel, iterations=1)
 
-mask_soft = cv2.GaussianBlur(mask_eroded, (71, 71), 0)
+maskSoft = cv2.GaussianBlur(maskEroded, (71, 71), 0)
 
-alpha = cv2.cvtColor(mask_soft, cv2.COLOR_GRAY2BGR).astype(float) / 255.0
+alpha = cv2.cvtColor(maskSoft, cv2.COLOR_GRAY2BGR).astype(float) / 255.0
 srcBlended = (src.astype(float) * alpha + dst.astype(float) * (1.0 - alpha)).astype(numpy.uint8)
 
 r = cv2.boundingRect(hull)
 center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
-output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
+output = cv2.seamlessClone(srcBlended, dst, maskEroded, center, cv2.NORMAL_CLONE)
 
 cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/190/IM190-low.png", output)

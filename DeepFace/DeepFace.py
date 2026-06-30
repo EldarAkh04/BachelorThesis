@@ -17,6 +17,7 @@ pathToCompare = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepF
 
 def passControl(img1, img2):
     result = DeepFace.verify(img1, img2, model_name = "Facenet512")
+    #result = DeepFace.verify(img1, img2, model_name = "VGG-Face")
     verified = bool(result['verified'])
     distance = round(result['distance'], 4)
     threshold = float(result['threshold'])

@@ -204,16 +204,16 @@ hull = cv2.convexHull(numpy.array(landmarksA[outerPoints], dtype=numpy.int32))
 cv2.fillPoly(mask, [hull], 255)
 
 kernel = numpy.ones((15, 15), numpy.uint8)
-mask_eroded = cv2.erode(mask, kernel, iterations=1)
+maskEroded = cv2.erode(mask, kernel, iterations=1)
 
-mask_soft = cv2.GaussianBlur(mask_eroded, (71, 71), 0)
+maskSoft = cv2.GaussianBlur(maskEroded, (71, 71), 0)
 
-alpha = cv2.cvtColor(mask_soft, cv2.COLOR_GRAY2BGR).astype(float) / 255.0
+alpha = cv2.cvtColor(maskSoft, cv2.COLOR_GRAY2BGR).astype(float) / 255.0
 srcBlended = (src.astype(float) * alpha + dst.astype(float) * (1.0 - alpha)).astype(numpy.uint8)
 
 r = cv2.boundingRect(hull)
 center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
-output = cv2.seamlessClone(srcBlended, dst, mask_eroded, center, cv2.NORMAL_CLONE)
+output = cv2.seamlessClone(srcBlended, dst, maskEroded, center, cv2.NORMAL_CLONE)
 
 cv2.imwrite("Test2.png", output)

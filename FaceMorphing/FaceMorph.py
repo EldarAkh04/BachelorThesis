@@ -65,6 +65,8 @@ imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
+outputPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Results/"
+
 def getLandMarks(im):
     rects = detector(im, 1)
     return numpy.matrix([[p.x, p.y] for p in predictor(im, rects[0]).parts()])
@@ -355,8 +357,8 @@ print(f"Mit Randpunkten: {len(landmarksAFull)}")
 imageWithLandMarksA = annotateLandmarks(imageA, landmarksAFull)
 imageWithLandMarksB = annotateLandmarks(imageBaligned, landmarksBFull)
 
-cv2.imwrite('ImageA.png', imageWithLandMarksA)
-cv2.imwrite('ImageB.png', imageWithLandMarksB)
+cv2.imwrite(outputPath + 'ImageA.png', imageWithLandMarksA)
+cv2.imwrite(outputPath + 'ImageB.png', imageWithLandMarksB)
 
 """ cv2.imshow('ImageA', imageWithLandMarksA)
 cv2.imshow('ImageB', imageWithLandMarksB)
@@ -375,17 +377,17 @@ landmarksMorphed = averageLandmark(landmarksAFull, landmarksBFull)
 tri = delaunayTriangle(landmarksMorphed)
 blankImage = numpy.zeros(imageA.shape, dtype=numpy.uint8)
 debugImage = drawDelaunay(blankImage, landmarksMorphed, tri.simplices)
-cv2.imwrite("DelaunayTrian.png", debugImage)
+cv2.imwrite(outputPath + "DelaunayTrian.png", debugImage)
 print(f"Anzahl Dreiecke: {len(tri.simplices)}")
 
 
 debugImageA = imageA.copy()
 debugImageA = drawDelaunay(debugImageA, landmarksAFull, tri.simplices)
-cv2.imwrite("DelaunayTrian_A.png", debugImageA)
+cv2.imwrite(outputPath + "DelaunayTrian_A.png", debugImageA)
 
 debugImageB = imageBaligned.copy()
 debugImageB = drawDelaunay(debugImageB, landmarksBFull, tri.simplices)
-cv2.imwrite("DelaunayTrian_B.png", debugImageB)
+cv2.imwrite(outputPath + "DelaunayTrian_B.png", debugImageB)
 
 # Morphing mit jedem Landmark
 imgMorph = numpy.zeros(imageA.shape, dtype=imageA.dtype)
@@ -398,11 +400,11 @@ for s in tri.simplices:
 
 imgMorph = cv2.bilateralFilter(imgMorph, 5, 50, 50)
 
-cv2.imwrite("FinalMorph.png", imgMorph)
+cv2.imwrite(outputPath + "FinalMorph.png", imgMorph)
 print("Morph gespeichert!")
 
 #Hintergrund übernehmen:
-morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/FinalMorph.png"
+morphedPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Results/FinalMorph.png"
 if(os.path.exists(morphedPath)):
     print("ist vorhanden")
 

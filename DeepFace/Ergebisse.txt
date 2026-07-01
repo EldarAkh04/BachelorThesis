@@ -1,4 +1,0 @@
--Bei Kapitel 3 noch erwähnen, warum ich den test nicht andersrum mache:
---> Also Morph A und B und Bi als Hintergrund und dann B und A mit Morph verifizieren
-
---> Analysieren, wie sehr Hintergrund einen Affekt auf das Ergebnis hat Kapitel 5

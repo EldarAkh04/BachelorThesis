@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import os
 
-
+imgx = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/IM98.png"
 img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM190.png"
 img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM181.png"
 
@@ -75,6 +75,18 @@ def comparePersons(compareImage, pathToCompare):
     df.to_excel("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/vergleiche471.xlsx", index=False)
     print("Fertig")
 
+def analyzePerson(im1):
+    result = DeepFace.analyze(im1, actions=['gender', 'race'])[0]
+    analysis = {
+        'gender': result['dominant_gender'],
+        'race': result['dominant_race']
+    }
+    return analysis
+
+
 #comparePersons(compareImage, pathToCompare)
-passControl(img1, imgMorph)
+#passControl(img1, imgMorph)
 #classifyPerson(folderPath)
+person = analyzePerson(imgx)
+print("Gender: " + person['gender'])
+print("Race: " + person['race'])

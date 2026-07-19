@@ -4,8 +4,8 @@ import pandas as pd
 import os
 
 imgx = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/IM98.png"
-img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM190.png"
-img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM181.png"
+img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/101/Test1.png"
+img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/101/Test2.png"
 
 imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/190/IM190-low.png"
 #imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/TestE.png"
@@ -85,8 +85,8 @@ def analyzePerson(im1):
 
 
 #comparePersons(compareImage, pathToCompare)
-#passControl(img1, imgMorph)
+passControl(img1, img2)
 #classifyPerson(folderPath)
-person = analyzePerson(imgx)
+""" person = analyzePerson(imgx)
 print("Gender: " + person['gender'])
-print("Race: " + person['race'])
+print("Race: " + person['race']) """

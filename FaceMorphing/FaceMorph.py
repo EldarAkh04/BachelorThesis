@@ -60,8 +60,8 @@ from scipy.spatial import Delaunay
 
 ShapePredictor = "shape_predictor_68_face_landmarks.dat"
 
-imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Woman/IM17.png"
-imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Woman/IM454.png"
+imagePathA = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/IM351.png"
+imagePathB = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/IM129.png"
 predictor = dlib.shape_predictor(ShapePredictor)
 detector = dlib.get_frontal_face_detector()
 
@@ -448,4 +448,4 @@ center = (r[0] + r[2] // 2, r[1] + r[3] // 2)
 
 output = cv2.seamlessClone(srcBlended, dst, maskEroded, center, cv2.NORMAL_CLONE)
 
-cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/Results/Result.png", output)
+cv2.imwrite("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/129/IM129-hig.png", output)

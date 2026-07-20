@@ -4,16 +4,16 @@ import pandas as pd
 import os
 
 imgx = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/IM98.png"
-img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/101/Test1.png"
-img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/asian/Man/101/Test2.png"
+img1 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/IM113.png"
+img2 = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/IM182.png"
 
-imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/indian/Man/190/IM190-low.png"
+imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/129/IM129-low.png"
 #imgMorph = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/FaceMorphing/TestE.png"
 
 folderPath = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic"
 
-compareImage = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/IM471.png"
-pathToCompare = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man"
+compareImage = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/IM129.png"
+pathToCompare = "/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man"
 
 def passControl(img1, img2):
     result = DeepFace.verify(img1, img2, model_name = "Facenet512")
@@ -72,7 +72,7 @@ def comparePersons(compareImage, pathToCompare):
         })   
     
     df = pd.DataFrame(data)
-    df.to_excel("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/black/Man/vergleiche471.xlsx", index=False)
+    df.to_excel("/Users/eldarakhundzada/Desktop/8. Semester/BachelorThesis/DeepFace/Persons/latino hispanic/Man/129/vergleiche129.xlsx", index=False)
     print("Fertig")
 
 def analyzePerson(im1):
@@ -85,7 +85,7 @@ def analyzePerson(im1):
 
 
 #comparePersons(compareImage, pathToCompare)
-passControl(img1, img2)
+passControl(img2, imgMorph)
 #classifyPerson(folderPath)
 """ person = analyzePerson(imgx)
 print("Gender: " + person['gender'])

@@ -9,3 +9,5 @@ BachelorThesis/CLIP_Modell
 BachelorThesis/replicate
 BachelorThesis/stableDif
 FaceMorphing/OpenTem.py
+~$*.xlsx
+*.tmp
